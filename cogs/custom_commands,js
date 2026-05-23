@@ -1,0 +1,29 @@
+import discord
+from discord.ext import commands
+import json
+import os
+
+class CustomCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.storage_path = "custom_configs.json"
+
+    def load_user_data(self):
+        if os.path.exists(self.storage_path):
+            with open(self.storage_path, 'r') as f:
+                return json.load(f)
+        return {}
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        data = self.load_user_data()
+        # Check if the message matches a custom trigger for this bot
+        content = message.content.lower()
+        if content in data:
+            await message.channel.send(data[content])
+
+async def setup(bot):
+    await bot.add_cog(CustomCommands(bot))
