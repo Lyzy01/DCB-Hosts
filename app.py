@@ -3,10 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
+
+# This creates the database file bot_manager.db automatically
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bot_manager.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Database table for your customers
 class UserBot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     owner_name = db.Column(db.String(100))
@@ -15,47 +18,48 @@ class UserBot(db.Model):
     custom_command = db.Column(db.String(50))
     custom_response = db.Column(db.String(500))
 
-# --- THE HTML DASHBOARD ---
+# The Professional Dark UI
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Bot Hosting Manager</title>
+    <meta charset="UTF-8">
+    <title>Ly's Bot Hosting Dashboard</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
-        .box { background: #1e1e1e; padding: 20px; border-radius: 10px; max-width: 600px; margin-bottom: 20px; }
-        input { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .record { border-bottom: 1px solid #333; padding: 10px 0; }
-        code { background: #333; padding: 2px 5px; color: #00ff00; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 40px; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 650px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h1 { color: #38bdf8; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #0ea5e9; }
+        .bot-list { margin-top: 30px; }
+        .bot-item { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
+        code { color: #fbbf24; }
     </style>
 </head>
 <body>
-    <h1>🚀 Ly's Bot Hosting</h1>
-    
-    <div class="box">
-        <h3>Add New Bot Instance</h3>
+    <div class="card">
+        <h1>🚀 Bot Deployment Center</h1>
         <form method="POST" action="/setup">
-            <input type="text" name="owner_name" placeholder="Client Name" required><br>
-            <input type="password" name="bot_token" placeholder="Discord Bot Token" required><br>
-            <input type="password" name="ai_api_key" placeholder="AI API Key (Optional)"><br>
-            <input type="text" name="command" placeholder="Trigger (e.g. !hello)"><br>
-            <input type="text" name="response" placeholder="Response text"><br><br>
-            <button type="submit">Launch Bot</button>
+            <input type="text" name="owner_name" placeholder="Client Name" required>
+            <input type="password" name="bot_token" placeholder="Discord Bot Token" required>
+            <input type="password" name="ai_api_key" placeholder="AI API Key (Optional)">
+            <input type="text" name="command" placeholder="Custom Command (e.g. !info)">
+            <input type="text" name="response" placeholder="Bot's Response">
+            <button type="submit">Deploy Instance</button>
         </form>
-    </div>
 
-    <div class="box">
-        <h3>📂 Database Records (Inside bot_manager.db)</h3>
-        {% for bot in bots %}
-        <div class="record">
-            <strong>{{ bot.owner_name }}</strong><br>
-            Token: <code>{{ bot.bot_token[:15] }}...</code><br>
-            Custom Cmd: <code>{{ bot.custom_command }}</code>
+        <div class="bot-list">
+            <h3>📂 Live Database Records</h3>
+            {% for bot in bots %}
+            <div class="bot-item">
+                <strong>{{ bot.owner_name }}'s Bot</strong><br>
+                <small>Trigger: <code>{{ bot.custom_command }}</code> | Token: <code>{{ bot.bot_token[:12] }}...</code></small>
+            </div>
+            {% else %}
+            <p style="opacity: 0.5;">No bots deployed yet.</p>
+            {% endfor %}
         </div>
-        {% else %}
-        <p>No bots registered yet.</p>
-        {% endfor %}
     </div>
 </body>
 </html>
@@ -73,7 +77,7 @@ def setup():
         bot_token=request.form.get('bot_token'),
         ai_api_key=request.form.get('ai_api_key'),
         custom_command=request.form.get('command') or "!hello",
-        custom_response=request.form.get('response') or "Online!"
+        custom_response=request.form.get('response') or "I am online!"
     )
     db.session.add(new_bot)
     db.session.commit()
@@ -82,4 +86,5 @@ def setup():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=5000)
+    # Port 10000 is often preferred by Render
+    app.run(host='0.0.0.0', port=10000)
