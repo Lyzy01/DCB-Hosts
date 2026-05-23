@@ -3,3 +3,4 @@ flask
 flask-sqlalchemy
 httpx
 python-dotenv
+gunicorn
