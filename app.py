@@ -84,7 +84,13 @@ def setup():
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
+    # 1. Force the database and tables to be created FIRST
     with app.app_context():
+        print("Creating database tables...")
         db.create_all()
-    # Port 10000 is often preferred by Render
-    app.run(host='0.0.0.0', port=10000)
+        print("Tables created successfully!")
+    
+    # 2. Then start the web server
+    # Render uses the PORT environment variable, so we check for it
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
